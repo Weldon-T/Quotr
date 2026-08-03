@@ -1,4 +1,4 @@
-# Quotr 测试计划和发布管理
+# Quotr 测试计划和发布管理 v0.7
 
 **日期**：2026-08-03
 **环境**：test.quotr.ai
@@ -604,7 +604,7 @@ PR 提交 ──→ 合入 main ──→ Nightly ──→ Release Candidate �
 |---------|------|------|------|
 | Lint / Type Check | 代码规范、类型安全 | ESLint, tsc, mypy | < 1min |
 | Unit Test | 纯函数、工具函数、API handler 单元 | Jest, pytest | < 2min |
-| L0 Smoke（自动） | 登录成功/失败、4 导航可达、`/api/query-org` 200、localStorage 完整性 | Playwright | ~3min |
+| L0 Smoke（自动） | 登录成功/失败、4 导航可达、`/api/query-org` 200、localStorage 完整性 | Playwright | ~10min |
 | 安全 header 检查 | CSP, HSTS, X-Frame-Options 存在性 | Playwright | < 30s |
 | 依赖漏洞扫描 | 新增依赖是否有已知 CVE | `pip audit` / `npm audit` | < 1min |
 
@@ -620,11 +620,11 @@ PR 提交 ──→ 合入 main ──→ Nightly ──→ Release Candidate �
 
 | 测试类型 | 内容 | 工具 | 耗时 |
 |---------|------|------|------|
-| L1 Critical Path（自动） | L0 全部 + 模块基本 CRUD + API 契约测试 | Playwright | ~15min |
-| 安全全量（自动） | IDOR、未认证访问、JWT 篡改、XSS 注入 | Playwright | ~5min |
-| 无障碍扫描（自动） | 所有关键页面的 WCAG 违规检测 | `@axe-core/playwright` | ~3min |
-| 兼容性冒烟（自动） | Chrome/Edge/Firefox + iPad viewport 各跑登录 + 导航 | Playwright (多 project) | ~5min |
-| 并发基础（自动） | API 幂等性、按钮防重复提交 | Playwright | ~2min |
+| L1 Critical Path（自动） | L0 全部 + 模块基本 CRUD + API 契约测试 | Playwright | ~30min |
+| 安全全量（自动） | IDOR、未认证访问、JWT 篡改、XSS 注入 | Playwright | ~8min |
+| 无障碍扫描（自动） | 所有关键页面的 WCAG 违规检测 | `@axe-core/playwright` | ~5min |
+| 兼容性冒烟（自动） | Chrome/Edge/Firefox + iPad viewport 各跑登录 + 导航 | Playwright (多 project) | ~15min |
+| 并发基础（自动） | API 幂等性、按钮防重复提交 | Playwright | ~5min |
 
 **QA 职责**：上午 10 点查看报告。失败 → 排查是否为环境问题 → 若是真实回归 → 提 Bug。
 
@@ -640,14 +640,14 @@ PR 提交 ──→ 合入 main ──→ Nightly ──→ Release Candidate �
 
 | 测试类型 | 内容 | 耗时 |
 |---------|------|------|
-| L2 Full Regression | 所有模块完整场景 + 跨模块数据流 + 空状态 | ~2h |
-| AI Baseline 自动评估 | 结构化 F1 + 数量/金额偏差 + BERTScore + RAGAs（Context Relevance / Faithfulness / Answer Relevance） | ~2h（与 L2 并行） |
-| 性能基线采集 | API 延迟（P50/P95/P99 + 退化对比）+ Dashboard 渲染 FCP/LCP | ~5min |
-| 安全全量回归 | 安全用例全集 | ~5min |
-| 无障碍全量 | 新增页面/组件的 WCAG 扫描 | ~3min |
-| 兼容性全量 | Chrome/Edge/Firefox/Safari + iPad viewport 上的核心流程回归 | ~10min |
-| 支付 Webhook 模拟 | Stripe test mode 事件回放 | ~2min |
-| 并发完整 | 同项目并发编辑、供应商并发修改、模板并发使用 | ~3min |
+| L2 Full Regression | 所有模块完整场景 + 跨模块数据流 + 空状态 | ~2.5h |
+| AI Baseline 自动评估 | 结构化 F1 + 数量/金额偏差 + BERTScore + RAGAs（Context Relevance / Faithfulness / Answer Relevance） | ~3h（与 L2 并行） |
+| 性能基线采集 | API 延迟（P50/P95/P99 + 退化对比）+ Dashboard 渲染 FCP/LCP | ~15min |
+| 安全全量回归 | 安全用例全集 | ~8min |
+| 无障碍全量 | 新增页面/组件的 WCAG 扫描 | ~8min |
+| 兼容性全量 | Chrome/Edge/Firefox/Safari + iPad viewport 上的核心流程回归 | ~20min |
+| 支付 Webhook 模拟 | Stripe test mode 事件回放 | ~5min |
+| 并发完整 | 同项目并发编辑、供应商并发修改、模板并发使用 | ~8min |
 
 **QA 职责**：分析失败用例 → 区分环境/数据问题 vs 真实回归 → 真实回归提 Bug 阻塞 RC。
 
@@ -932,13 +932,13 @@ PR 提交 ──→ 合入 main ──→ Nightly ──→ Release Candidate �
 ### 7.2 测试分层
 
 ```
-L0 Smoke (每次 PR, ~3 min)
-  ├── 登录成功 / 失败
+L0 Smoke (每次 PR, ~10 min)
+  ├── 登录成功 / 失败（每次 ~3min，含反爬等待）
   ├── 4 个导航可访问 (200 + 非白屏)
   ├── /api/query-org 健康检查
   └── localStorage 关键字段完整性
 
-L1 Critical Path (每日, ~15 min)
+L1 Critical Path (每日, ~30 min)
   ├── L0 全部
   ├── API 契约测试（所有已知端点）
   ├── 安全用例全量（IDOR / 未认证访问 / JWT / XSS）
@@ -946,7 +946,7 @@ L1 Critical Path (每日, ~15 min)
   ├── 兼容性冒烟（Chrome/Edge/Firefox + iPad viewport）
   └── Database/Template/Suppliers 基本 CRUD
 
-L2 Full Regression (RC 时触发, ~2h)
+L2 Full Regression (RC 时触发, ~3h)
   ├── L1 全部
   ├── 所有模块完整场景 + 跨模块数据一致性 + 空状态
   ├── AI Golden Baseline（BERTScore + RAGAs + 结构化 F1 + Schema）
@@ -1006,7 +1006,7 @@ tests/
 │   ├── page_factory.py      # Registry 模式：惰性创建 + 缓存 Page Object
 │   └── decorators.py        # @retry 重试 / @screenshot_on_failure 失败截图
 ├── config/
-│   ├── settings.py          # 从 .env 读取，零硬编码
+│   ├── settings.py          # 从 .env 读取 + WAIT 时间常量（避免硬编码）
 │   └── routes.py            # 路由常量 + localStorage key 常量
 ├── pages/                   # Page Object Model（组合式，通过 PageFactory 获取）
 │   ├── base_page.py         # goto(), is_white_screen(), ls_get(), screenshot()
@@ -1057,7 +1057,9 @@ tests/
 ├── utils/
 │   ├── helpers.py           # human_pause, wait_for_spa, goto_spa, snap, dump_text
 │   ├── antd_selectors.py    # Ant Design 组件封装：table_rows, tabs, form_items, modal
-│   └── reporter.py          # TestReporter: summary(), to_json()
+│   ├── reporter.py          # TestReporter: summary(), to_json()
+│   └── html_reporter.py     # HtmlReport: 自动生成 HTML 报告 + Bug 知识库
+├── reports/                 # 自动生成的 HTML 报告（latest.html + 时间戳版本）
 └── fixtures/                # 共享测试数据
 ```
 
@@ -1111,6 +1113,21 @@ def antd_spinning(page):         # 是否加载中
 - `LatencyCollector`：warmup → 20 轮采集 → P50/P95/P99 → 基线对比 → 退化告警
 - `measure_page_load()`：Playwright Performance API 采集 FCP/LCP
 
+**等待策略（`config/settings.py` — `WAIT` 常量类）**：
+- 所有超时/等待集中在 `WAIT` 对象中，避免代码中散落魔法数字
+- `WAIT.AFTER_LOGIN_SUBMIT`：登录提交后等 redirect 完成
+- `WAIT.SPA_POLL_INTERVAL`：SPA 轮询间隔
+- `WAIT.HUMAN_DELAY_*`：人类操作模拟延迟范围
+- 页面对象中的 `wait_for_timeout()` 尽力替换为 `wait_for(state="visible/hidden")` 条件等待
+
+**HTML 报告自动生成（`utils/html_reporter.py`）：**
+- `HtmlReport` 类通过 `conftest.py` 的三个 pytest hooks 自动收集结果
+- `pytest_configure` → 初始化报告器
+- `pytest_runtest_makereport` → 逐用例收集（passed/failed/skipped + 耗时）
+- `pytest_sessionfinish` → 生成自包含 HTML 到 `tests/reports/`（`report_<timestamp>.html` + `latest.html`）
+- 报告内含 **Bug 知识库**：已确认的产品 Bug（安全 Header 缺失、Dashboard 重定向、Database 空白等）在测试失败时自动匹配并附带描述、影响分析和修复建议
+- 报告内容包括：KPI 卡片、模块覆盖统计、已知 Bug 详情、失败用例列表、全部用例折叠表
+
 **CI 集成：**
 - GitHub Action 触发 L0 Smoke（每次 PR，含安全头检查）
 - 每日 3:00 UTC 触发 L1 Critical Path（含 axe-core a11y 扫描 + 安全用例 + 性能基线采集）
@@ -1153,4 +1170,4 @@ def antd_spinning(page):         # 是否加载中
 
 ---
 
-> **版本**：v0.6 | **日期**：2026-08-03 | 
+> **版本**：v0.7 | **日期**：2026-08-03 | 
