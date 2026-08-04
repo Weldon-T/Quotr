@@ -68,6 +68,10 @@ def run_full():
     """全量单 session。一次 pytest → pytest_terminal_summary 直接生成 HTML。"""
     print(f"\n{'='*60}\n  Full Suite (single session, no expiry)\n{'='*60}")
 
+    # 清理旧日志（在打开新日志文件之前，避免文件句柄冲突）
+    for old in REPORT_DIR.glob("*.log"):
+        old.unlink(missing_ok=True)
+
     log = REPORT_DIR / "pytest_full.log"
     start = time.time()
     with open(log, "w") as f:

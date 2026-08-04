@@ -254,11 +254,9 @@ def _get_layer(nodeid: str = "") -> str:
 def pytest_configure(config):
     """每个 session 创建全新 HtmlReport + 清理旧中间文件（保留 .html 报告）。"""
     from tests.utils.html_reporter import HtmlReport, REPORT_DIR
-    # 清理上次 CI 分层残留 JSON + 旧日志
+    # 清理上次 CI 分层残留 JSON（日志由 run_ci.py 清理，避免文件句柄冲突）
     for stale in REPORT_DIR.glob("ci_layer_*.json"):
         stale.unlink(missing_ok=True)
-    for old_log in REPORT_DIR.glob("*.log"):
-        old_log.unlink(missing_ok=True)
     (REPORT_DIR / ".ci_accumulator.json").unlink(missing_ok=True)
 
     reporter = HtmlReport()

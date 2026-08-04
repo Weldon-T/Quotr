@@ -1,56 +1,67 @@
 Quotr 全量测试分析报告
 =======================
 日期：2026-08-04
-耗时：1123s (18:42)
+耗时：4506s (75min)
 
 一、总览
   总用例：117
-  通过：  50 (43%)
-  失败：  27
-  跳过：  40
-  错误：  0
+  通过：  43 (37%)
+  失败：  33
+  跳过：  33
+  错误：  8
+  环境阻塞：18（对比上次22，因 a11y+性能已激活）
 
 二、按模块
-  smoke (16):      12 pass, 3 fail, 1 skip   — 75% 通过
-  security (28):   18 pass, 5 fail, 5 skip   — 64% 通过
-  api (20):        12 pass, 8 fail, 0 skip   — 60% 通过
-  regression (24):  7 pass, 11 fail, 6 skip  — 29% 通过 (session过期)
-  payment (8):      0 pass, 0 fail, 8 skip   — 环境未就绪
-  a11y (6):         0 pass, 0 fail, 6 skip   — 环境未就绪
-  ai (5):           0 pass, 0 fail, 5 skip   — 环境未就绪
-  concurrency (4):  1 pass, 0 fail, 3 skip   — 环境未就绪
-  migration (3):    0 pass, 0 fail, 3 skip   — 环境未就绪
-  performance (3):  0 pass, 0 fail, 3 skip   — 环境未就绪
+  smoke (16):       9 pass, 6 fail, 1 skip   — 56%
+  security (28):   16 pass, 7 fail, 5 skip   — 57%
+  api (20):         9 pass, 3 fail, 8 error  — API fetch 超时
+  regression (24):  4 pass, 14 fail, 6 skip  — 17% (session 过期)
+  a11y (6):         3 pass, 1 fail, 2 skip   — 已激活 (new!)
+  performance (3):  1 pass, 2 fail, 0 skip   — 已激活 (new!)
+  payment (8):      0 pass, 0 fail, 8 skip   — Stripe 未配置
+  ai (5):           0 pass, 0 fail, 5 skip   — Golden Baseline 未配置
+  concurrency (4):  1 pass, 0 fail, 3 skip   — 需第二账号
+  migration (3):    0 pass, 0 fail, 3 skip   — staging DB 未接入
 
-三、失败原因分类 (27)
-  A. 产品Bug (5)
-     - 安全Header全缺 (CSP/HSTS/X-Content-Type-Options/X-Frame-Options)
-     - Dashboard未认证不重定向
-  B. Session过期 (11)
-     - regression层: JWT在测试中途过期，页面重定向到登录页
-  C. 网络/反爬 (8)
-     - API browser fetch超时 (test_authenticated_endpoints, meetings, bell)
-     - Page.goto超时 (navigation)
-  D. 其他 (3)
-     - user字段缺失, query-org异常, test_login_with_valid_credentials失败
+三、失败原因 (33 fail)
+  A. 产品Bug (7)
+     - 安全Header全缺: CSP/HSTS/X-Content-Type-Options/X-Frame-Options (5)
+     - Dashboard未认证不重定向 (1)
+     - Database模块空白 (1)
+  B. Session过期 (14) — regression层 JWT 过期，页面重定向到登录
+  C. 网络/超时 (8) — API browser fetch / Page.goto
+  D. 性能不达标 (2) — LCP>5s
+  E. 其他 (2) — sign-out-reason / login
 
-四、跳过原因 (40)
+四、错误原因 (8 error)
+  全部为 API 契约测试 browser fetch 超时：
+  test_authenticated_endpoints_return_200 (6个)、meetings (1个)、bell (1个)
+
+五、跳过原因 (33)
   - Stripe test mode未配置 (8)
-  - axe-core未安装 (6)
   - Golden Baseline未配置 (5)
-  - 第二测试账号未申请 (4)
   - staging DB未接入 (3)
-  - 项目创建功能不可用 (4)
-  - Database模块Bug (2)
-  - 其他占位 (8)
+  - 第二测试账号未申请 (3)
+  - 项目创建不可用 + Database Bug (6)
+  - 非headless模式键盘导航 (2)
+  - 其他 (6)
 
-五、产品Bug (2个触发)
+六、产品Bug（本次触发 3 个）
   BUG-001 [P0] 4个关键安全Header全部缺失
   BUG-002 [P0] Dashboard未认证不重定向
+  BUG-004 [P0] Database模块主内容区空白
 
-六、与上次对比
-  通过: 38 → 50 (+12)
-  失败: 32 → 27 (-5)
-  错误: 7 → 0 (-7, 全部修复)
-  耗时: 89min → 19min (-70min, session修复消除重复登录)
-  通过率: 32% → 43%
+  注：上次运行发现的 WCAG 违规(BUG-006/007)本次未触发——axe-core 测试全部通过。
+  可能原因：页面加载速度影响扫描结果，需加固 a11y 测试的等待逻辑。
+
+七、本次新激活 (7个)
+  ├── a11y/axe_core: 4个 (3 pass, 1 fail) — 之前因 npm 未安装全部 skip
+  └── performance: 3个 (1 pass, 2 fail) — 之前因 session 未就绪全部 skip
+
+八、与上次对比
+  通过:  50→43  (-7,  新增测试多为 fail)
+  失败:  27→33  (+6,  性能不达标+超时回归)
+  跳过:  40→33  (-7,  a11y+性能已激活)
+  错误:   0→8   (+8,  API fetch 超时)
+  耗时: 19→75min (+56, 性能测试大量页面加载)
+  阻塞:  22→18  (-4,  环境就绪改善)
