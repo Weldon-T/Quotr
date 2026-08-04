@@ -3,6 +3,7 @@ from playwright.sync_api import Page
 
 from tests.config.routes import PROJECT_LIST, DATABASE, TEMPLATE, SUPPLIERS
 from tests.pages.base_page import BasePage
+from tests.utils.helpers import wait_for_spa
 
 
 class DashboardPage(BasePage):
@@ -47,8 +48,6 @@ class DashboardPage(BasePage):
 
 def navigate_all_modules(page: Page) -> dict[str, dict]:
     """遍历 4 个一级模块，返回每个模块的状态（url, is_white_screen, body_length）。"""
-    from tests.utils.helpers import wait_for_spa
-
     results = {}
     for name, path in [
         ("Project", PROJECT_LIST),

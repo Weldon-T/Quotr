@@ -28,10 +28,15 @@ LAYERS = {
 
 
 def _parse_pytest_output(text: str) -> dict:
-    m = re.search(r"(\d+) passed.*?(\d+) failed.*?(\d+) skipped", text)
-    if m:
-        return {"passed": int(m[1]), "failed": int(m[2]), "skipped": int(m[3])}
-    return {"passed": 0, "failed": 0, "skipped": 0}
+    """解析 pytest 摘要行（格式：= X failed, Y passed, Z skipped ... =）。"""
+    p = re.search(r"(\d+) passed", text)
+    f = re.search(r"(\d+) failed", text)
+    s = re.search(r"(\d+) skipped", text)
+    return {
+        "passed": int(p.group(1)) if p else 0,
+        "failed": int(f.group(1)) if f else 0,
+        "skipped": int(s.group(1)) if s else 0,
+    }
 
 
 def run_single_layer(name: str, display: str, markers: str):

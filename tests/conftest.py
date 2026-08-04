@@ -169,25 +169,26 @@ def logged_in_context(browser):
 
 @pytest.fixture(scope="function")
 def logged_in_page(logged_in_context):
-    """已登录页面。如果 session 过期则自动重新登录。"""
-    p = logged_in_context.new_page()
-    p.goto(f"{BASE_URL}/dashboard/project", wait_until="commit", timeout=NAVIGATION_TIMEOUT)
-    wait_for_spa(p, max_wait=10)
-    # 检测是否被重定向到登录页（session 过期）
-    if "sign in" in p.url.lower() or "sign in" in p.locator("body").inner_text()[:200].lower():
+    """已登录页面。每次创建时验证 session 有效性，过期则自动重新登录。"""
+    # 先检查 cached context 的 session 是否还活着
+    check = logged_in_context.new_page()
+    check.goto(f"{BASE_URL}/dashboard/project", wait_until="commit", timeout=NAVIGATION_TIMEOUT)
+    wait_for_spa(check, max_wait=10)
+    body = check.locator("body").inner_text()[:200].lower()
+    check.close()
+
+    if "sign in" in body:
+        # Session 过期：清除缓存，重新登录
         AUTH_STATE_PATH.unlink(missing_ok=True)
-        p.close()
-        # 在 context 上重新登录
         lp = logged_in_context.new_page()
         ok = _do_login(lp)
         lp.close()
         if ok:
             logged_in_context.storage_state(path=str(AUTH_STATE_PATH))
-            p = logged_in_context.new_page()
-            p.goto(f"{BASE_URL}/dashboard/project", wait_until="commit", timeout=NAVIGATION_TIMEOUT)
-            wait_for_spa(p, max_wait=10)
-        else:
-            p = logged_in_context.new_page()
+
+    p = logged_in_context.new_page()
+    p.goto(f"{BASE_URL}/dashboard/project", wait_until="commit", timeout=NAVIGATION_TIMEOUT)
+    wait_for_spa(p, max_wait=10)
     yield p
     p.close()
 

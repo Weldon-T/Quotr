@@ -1097,6 +1097,7 @@ def antd_spinning(page):         # 是否加载中
 - `goto_spa(url)` — 导航 + SPA 挂载等待（`load` → 失败回退 `commit` → 轮询 `#root`）
 - `login()` — 重试 3 次，检测 SPA 是否渲染，未渲染则重新导航
 - 浏览器启动时注入反检测脚本（webdriver、plugins、languages 三项）
+- **Session 自动恢复**：`logged_in_page` fixture 每次创建时验证 session 是否有效，检测到登录页重定向则自动清除缓存并重新登录，保存新 token 到 storageState
 - **关键风险**：反爬可能在多次自动化后被触发（IP 限流），导致 CI 全量失败。缓解：
   - 非生产环境禁用反爬是最直接的做法
   - CI 固定 IP 池
