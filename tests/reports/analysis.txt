@@ -1,58 +1,56 @@
 Quotr 全量测试分析报告
 =======================
 日期：2026-08-04
-环境：test.quotr.ai
-耗时：5384s (1:29:44)
+耗时：1123s (18:42)
 
 一、总览
   总用例：117
-  通过：  38 (32%)
-  失败：  32
+  通过：  50 (43%)
+  失败：  27
   跳过：  40
-  错误：  7
+  错误：  0
 
 二、按模块
-  smoke (16):       9 pass, 5 fail, 1 skip, 1 error
-  security (28):   16 pass, 7 fail, 5 skip, 0 error
-  regression (24):  3 pass, 14 fail, 6 skip, 1 error
-  api (20):         9 pass, 6 fail, 0 skip, 5 error
-  payment (8):      0 pass, 0 fail, 8 skip, 0 error
-  a11y (6):         0 pass, 0 fail, 6 skip, 0 error
-  ai (5):           0 pass, 0 fail, 5 skip, 0 error
-  concurrency (4):  1 pass, 0 fail, 3 skip, 0 error
-  migration (3):    0 pass, 0 fail, 3 skip, 0 error
-  performance (3):  0 pass, 0 fail, 3 skip, 0 error
+  smoke (16):      12 pass, 3 fail, 1 skip   — 75% 通过
+  security (28):   18 pass, 5 fail, 5 skip   — 64% 通过
+  api (20):        12 pass, 8 fail, 0 skip   — 60% 通过
+  regression (24):  7 pass, 11 fail, 6 skip  — 29% 通过 (session过期)
+  payment (8):      0 pass, 0 fail, 8 skip   — 环境未就绪
+  a11y (6):         0 pass, 0 fail, 6 skip   — 环境未就绪
+  ai (5):           0 pass, 0 fail, 5 skip   — 环境未就绪
+  concurrency (4):  1 pass, 0 fail, 3 skip   — 环境未就绪
+  migration (3):    0 pass, 0 fail, 3 skip   — 环境未就绪
+  performance (3):  0 pass, 0 fail, 3 skip   — 环境未就绪
 
-三、失败原因分类
+三、失败原因分类 (27)
   A. 产品Bug (5)
-     - 安全Header全部缺失 (CSP/HSTS/X-Content-Type-Options/X-Frame-Options)
+     - 安全Header全缺 (CSP/HSTS/X-Content-Type-Options/X-Frame-Options)
      - Dashboard未认证不重定向
-     - Database模块空白
-  B. Session过期 (15)
-     - regression层大部分失败：session在smoke跑完后过期
-     - 需要增加logged_in_page的自动续期逻辑（已部分实现但检测不够早）
-  C. 网络/超时 (7)
-     - 浏览器navigation超时、API调用超时
-  D. 其他 (5)
-     - 登录页SPA不渲染（反爬）
-     - user字段缺失
+  B. Session过期 (11)
+     - regression层: JWT在测试中途过期，页面重定向到登录页
+  C. 网络/反爬 (8)
+     - API browser fetch超时 (test_authenticated_endpoints, meetings, bell)
+     - Page.goto超时 (navigation)
+  D. 其他 (3)
+     - user字段缺失, query-org异常, test_login_with_valid_credentials失败
 
 四、跳过原因 (40)
   - Stripe test mode未配置 (8)
   - axe-core未安装 (6)
   - Golden Baseline未配置 (5)
   - 第二测试账号未申请 (4)
-  - 数据库连接未配置 (3)
+  - staging DB未接入 (3)
   - 项目创建功能不可用 (4)
   - Database模块Bug (2)
   - 其他占位 (8)
 
-五、产品Bug详情
+五、产品Bug (2个触发)
   BUG-001 [P0] 4个关键安全Header全部缺失
-  BUG-002 [P0] 未认证用户访问Dashboard不强制重定向
-  BUG-004 [P0] Database模块主内容区空白
+  BUG-002 [P0] Dashboard未认证不重定向
 
-六、代码待修复
-  1. logged_in_page session自动续期不够及时（需在每次page创建时检查）
-  2. API contract测试中的browser fetch超时处理
-  3. run_ci.py的_pytest_output解析（显示0/0/0是正则未匹配到非ASCII字符）
+六、与上次对比
+  通过: 38 → 50 (+12)
+  失败: 32 → 27 (-5)
+  错误: 7 → 0 (-7, 全部修复)
+  耗时: 89min → 19min (-70min, session修复消除重复登录)
+  通过率: 32% → 43%

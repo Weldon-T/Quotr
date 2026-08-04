@@ -34,8 +34,19 @@ tests/
 └── config/       路由常量 / 配置
 ```
 
+## 最新结果
+
+| 指标 | 值 |
+|------|-----|
+| 总用例 | 117 |
+| 通过 | 50 (43%) |
+| 失败 | 27 |
+| 跳过 | 40 |
+| 错误 | 0 |
+| 耗时 | ~19min |
+
 ## 报告
 
 `tests/reports/latest.html` — 自包含 HTML，含 KPI / 层级 / 模块 / Bug / 全部用例详情。
 
-`tests/reports/analysis.txt` — 最近一次全量运行的分析摘要。
+`tests/reports/analysis.txt` — 最新全量运行的分析摘要。
