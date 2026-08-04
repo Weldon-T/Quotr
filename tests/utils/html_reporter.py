@@ -58,6 +58,16 @@ BUG_KB = {
         "description": "/dashboard/database 仅渲染侧边栏，主内容区无任何 DOM 元素。无 console error。",
         "fix": "检查 React Router 中 Database 路由注册和 Suspense/lazy 配置。",
     },
+    "test_dashboard_template_a11y": {
+        "id": "BUG-006", "title": "Template 页面无障碍违规（button-name, color-contrast）", "severity": "P1", "module": "A11y",
+        "description": "Template 页面存在 serious 级 WCAG 违规：按钮缺少可访问名称、颜色对比度不足。",
+        "fix": "为图标按钮添加 aria-label，调整颜色满足 4.5:1 对比度。",
+    },
+    "test_dashboard_suppliers_a11y": {
+        "id": "BUG-007", "title": "Suppliers 页面无障碍违规（aria-command-name, button-name, color-contrast）", "severity": "P1", "module": "A11y",
+        "description": "Suppliers 页面存在 serious 级 WCAG 违规：ARIA 命令缺少名称、按钮缺少可访问名称、颜色对比度不足。",
+        "fix": "为 ARIA command 和图标按钮添加 aria-label，调整对比度。",
+    },
 }
 
 

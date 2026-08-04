@@ -8,7 +8,6 @@ from pathlib import Path
 from statistics import median
 
 from tests.config.routes import PROJECT_LIST, DATABASE, TEMPLATE, SUPPLIERS
-from tests.pages.base_page import BasePage
 
 BASELINE_FILE = Path(__file__).parent / "rendering_baseline.json"
 MEASURE_ROUNDS = 5
@@ -49,42 +48,31 @@ def measure_page_load(page, url: str) -> dict:
 @pytest.mark.p2
 class TestRenderingPerformance:
 
-    @pytest.mark.skip(reason="需要已登录 session — 待 auth 方案稳定后启用")
-    def test_dashboard_pages_fcp_lcp(self, logged_in_page):
+    def test_dashboard_pages_fcp_lcp(self, logged_in_app):
         """所有 Dashboard 页面的 FCP/LCP 采集。"""
-        base = BasePage(logged_in_page)
         results = {}
-
         for name, route in PAGE_ROUTES.items():
             samples = []
             for _ in range(MEASURE_ROUNDS):
-                metrics = measure_page_load(logged_in_page, f"https://test.quotr.ai{route}")
+                metrics = measure_page_load(logged_in_app.page, f"https://test.quotr.ai{route}")
                 samples.append(metrics)
             results[name] = {
                 "fcp_median": median(s["fcp"] for s in samples if s["fcp"] > 0),
                 "lcp_median": median(s["lcp"] for s in samples if s["lcp"] > 0),
                 "samples": len(samples),
             }
-
-        # 输出报告
         print("\nRendering Performance Report")
         print("-" * 40)
         for name, r in results.items():
             print(f"  {name}: FCP={r['fcp_median']:.0f}ms LCP={r['lcp_median']:.0f}ms (n={r['samples']})")
-
-        # 不阻塞 Release，仅报告
         BASELINE_FILE.parent.mkdir(exist_ok=True)
         BASELINE_FILE.write_text(json.dumps(results, indent=2, default=str))
 
-    @pytest.mark.skip(reason="需要已登录 session — 待 auth 方案稳定后启用")
-    def test_no_page_exceeds_5s_lcp(self, logged_in_page):
+    def test_no_page_exceeds_5s_lcp(self, logged_in_app):
         """所有页面的 LCP 不应超过 5 秒。"""
-        base = BasePage(logged_in_page)
         slow_pages = []
-
         for name, route in PAGE_ROUTES.items():
-            metrics = measure_page_load(logged_in_page, f"https://test.quotr.ai{route}")
+            metrics = measure_page_load(logged_in_app.page, f"https://test.quotr.ai{route}")
             if metrics["lcp"] > 5000:
                 slow_pages.append(f"{name}: LCP={metrics['lcp']:.0f}ms")
-
         assert not slow_pages, f"以下页面 LCP > 5s:\n" + "\n".join(slow_pages)

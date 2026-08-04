@@ -597,7 +597,7 @@ tests/
 │   ├── test_api_latency.py  # P50/P95/P99 collection + baseline compare + alerts
 │   └── test_rendering.py    # Dashboard FCP/LCP Web Vitals collection
 ├── payment/                 # Stripe tests (awaiting test mode config)
-├── a11y/                    # Accessibility (awaiting npm install @axe-core/playwright)
+├── a11y/                    # Accessibility (active, found BUG-006/007 — WCAG violations)
 ├── migration/               # Migration tests (awaiting staging DB access)
 ├── concurrency/             # Concurrency tests (awaiting second account)
 ├── ai/

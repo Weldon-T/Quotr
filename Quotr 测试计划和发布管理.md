@@ -1043,7 +1043,7 @@ tests/
 │   ├── test_webhook.py      # Webhook 事件处理（待 Stripe CLI）
 │   └── test_invoice.py      # 发票生成验证
 ├── a11y/
-│   ├── test_axe_core.py     # axe-core WCAG 扫描（待 npm 安装）
+│   ├── test_axe_core.py     # axe-core WCAG 扫描（已激活，发现 BUG-006/007）
 │   └── test_keyboard.py     # 键盘导航自动化
 ├── migration/
 │   ├── test_migration_run.py    # 迁移执行 + 数据完整性 checksum

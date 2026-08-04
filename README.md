@@ -45,6 +45,8 @@ tests/
 | 错误 | 0 |
 | 耗时 | ~19min |
 
+> a11y + 性能测试已激活（+7 用例），下次运行 blocked 将降至 ~15
+
 ## 报告
 
 `tests/reports/latest.html` — 自包含 HTML，含 KPI / 层级 / 模块 / Bug / 全部用例详情。
