@@ -1,0 +1,23 @@
+[
+  {
+    "id": "sample_001",
+    "drawing_path": "fixtures/drawings/sample_001.png",
+    "ground_truth": {
+      "room_types": ["Living Room", "Kitchen", "Bedroom"],
+      "materials": [
+        {"name": "Drywall 5/8\"", "quantity": 120, "unit": "sqft", "unit_cost": 2.50},
+        {"name": "Metal Stud 25GA", "quantity": 80, "unit": "lnft", "unit_cost": 4.80}
+      ],
+      "total_cost": 1920.00
+    },
+    "ground_truth_texts": [
+      "Painted Gypsum Board Partition",
+      "Porcelain Floor Tile 12 inch by 12 inch"
+    ],
+    "ground_truth_contexts": [
+      "Drywall 5/8 inch - $2.50 per sqft",
+      "Metal Stud 25GA - $4.80 per lnft",
+      "R13 Batt Insulation - $1.20 per sqft"
+    ]
+  }
+]

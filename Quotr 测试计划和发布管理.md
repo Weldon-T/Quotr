@@ -1128,12 +1128,23 @@ def antd_spinning(page):         # 是否加载中
 - 报告内含 **Bug 知识库**：已确认的产品 Bug（安全 Header 缺失、Dashboard 重定向、Database 空白等）在测试失败时自动匹配并附带描述、影响分析和修复建议
 - 报告内容包括：KPI 卡片、模块覆盖统计、已知 Bug 详情、失败用例列表、全部用例折叠表
 
-**CI 集成：**
-- GitHub Action 触发 L0 Smoke（每次 PR，含安全头检查）
-- 每日 3:00 UTC 触发 L1 Critical Path（含 axe-core a11y 扫描 + 安全用例 + 性能基线采集）
-- L2 Full Regression 在 RC ready 时手动触发（含 AI Baseline + 性能退化对比）
-- 依赖漏洞扫描（`pip audit`）每次 PR 运行
-- 失败自动推送 Slack `#release-风险`
+**执行入口（`run_ci.py`）— 唯一测试运行方式：**
+- `python run_ci.py` — 全量单 session（所有 marker，一次 pytest，session 不过期，带层级标签）
+- `python run_ci.py --layer smoke` — L0 Smoke（GitHub Actions PR 触发）
+- `python run_ci.py --layer critical` — L1 Critical Path（GitHub Actions 定时）
+- `python run_ci.py --layer regression` — L2 Full Regression（GitHub Actions 手动）
+- 全量模式：层级通过模块路径自动推断（smoke→L0, security/api→L1, regression/perf/ai→L2, payment 等→BLOCKED）
+- 单层模式：`QUOTR_CI_LAYER` 环境变量标记，per-layer JSON 合并生成报告
+- 输出日志写入 `tests/reports/pytest_*.log`，HTML 报告 → `tests/reports/latest.html`
+
+**CI 集成（生产环境 — `.github/workflows/ci.yml`）：**
+- `pull_request` → L0 Smoke job（~15min timeout）
+- `schedule` (每日 3:00 UTC) → L1 Critical Path job（~45min timeout）
+- `workflow_dispatch` (手动触发) → L2 Full Regression job（~240min timeout），可选择 smoke/critical/regression/all
+- `pull_request` → Dependency audit job（`pip audit`）
+- 凭据通过 GitHub Secrets 注入（`QUOTR_EMAIL`, `QUOTR_PASSWORD`）
+- 失败自动通过 `slackapi/slack-github-action` 推送 Slack `#release-风险`
+- HTML 报告通过 `actions/upload-artifact` 上传为构建产物
 
 ---
 

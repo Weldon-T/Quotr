@@ -626,12 +626,23 @@ All timing/throttle values centralized in `WAIT` object. Page objects prefer `wa
 **HTML Report Auto-generation** — `tests/utils/html_reporter.py`:
 `HtmlReport` class collects results via three pytest hooks (`pytest_configure`, `pytest_runtest_makereport`, `pytest_sessionfinish`). Generates self-contained HTML to `tests/reports/` after every run. Includes a Bug Knowledge Base that automatically matches known product bugs (security headers, dashboard redirect, database blank) to failed tests, providing descriptions, impact analysis, and fix suggestions.
 
-**CI Integration:**
-- GitHub Action: L0 Smoke per PR (with security header check)
-- Daily 3:00 UTC: L1 Critical Path (with a11y + security + performance baseline)
-- L2 Full Regression: manually triggered on RC ready (with AI Baseline + degradation comparison)
-- Dependency vuln scan: per PR (`pip audit`)
-- Failures auto-push to Slack `#release-风险`
+**Test Runner (`run_ci.py`) — sole execution entry point:**
+- `python run_ci.py` — Full suite, single session, no expiry, with layer tags
+- `python run_ci.py --layer smoke` — L0 Smoke (GitHub Actions PR trigger)
+- `python run_ci.py --layer critical` — L1 Critical Path (GitHub Actions scheduled)
+- `python run_ci.py --layer regression` — L2 Full Regression (GitHub Actions manual)
+- Full mode: layers inferred from module paths (smoke→L0, security/api→L1, regression/perf/ai→L2, payment etc.→BLOCKED)
+- Single-layer mode: `QUOTR_CI_LAYER` env var tagging, per-layer JSON merge for report
+- Output logs: `tests/reports/pytest_*.log`, HTML report: `tests/reports/latest.html`
+
+**CI Integration (production — `.github/workflows/ci.yml`):**
+- `pull_request` → L0 Smoke job (~15min timeout)
+- `schedule` (daily 3:00 UTC) → L1 Critical Path job (~45min timeout)
+- `workflow_dispatch` (manual trigger) → L2 Full Regression job (~240min timeout), selectable layer
+- `pull_request` → Dependency audit job (`pip audit`)
+- Credentials via GitHub Secrets (`QUOTR_EMAIL`, `QUOTR_PASSWORD`)
+- Failure auto-notification via `slackapi/slack-github-action`
+- HTML reports uploaded as build artifacts via `actions/upload-artifact`
 
 ---
 

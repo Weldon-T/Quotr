@@ -1,0 +1,10 @@
+.venv/
+.env
+.claude/
+*.pyc
+__pycache__/
+.pytest_cache/
+tests/.auth_state.json
+tests/screenshots/
+tests/reports/
+design_pic/
