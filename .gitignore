@@ -8,6 +8,4 @@ tests/.auth_state.json
 tests/screenshots/
 design_pic/
 node_modules/
-tests/reports/*
-!tests/reports/analysis.txt
-!tests/reports/latest.html
+tests/reports/
